@@ -1,10 +1,11 @@
-# Write a program that goes through all consecutive (non-overlapping) triplets looking for
+# EXERCISE 2:
+# a) Write a program that goes through all consecutive (non-overlapping) triplets looking for
 # stop codons. (Make sure you use the genetic code for DNA in the 5’-3’ direction.) Record
 # the distance L between consecutive stop codons. Repeat this computation for the 3 different
 # reading frames (0, +1, +2) in this direction. (You may skip calculations for the reverse
 # strand, that is complementary to the given one and proceeding in the opposite direction.)
 
-# Plot the distribution for the ORF lengths L calculated above, and compare it to that for random sequences
+# b) Plot the distribution for the ORF lengths L calculated above, and compare it to that for random sequences
 
 import random
 import matplotlib.pyplot as plt
@@ -93,7 +94,7 @@ mean_text = f"Mean ORF length (codons):\nFrame 0: {mean_frame_0:.2f}\nFrame 1: {
 plt.text(0.77, 0.15, mean_text, transform=plt.gca().transAxes, fontsize=10,
          bbox=dict(facecolor='white', alpha=0.5))
 
-plt.title('ORF Length Distribution', fontsize=16)
+plt.title('ORFs Length Distribution', fontsize=16)
 plt.xlabel('ORF length (codons)', fontsize=11)
 plt.ylabel('Relative frequency', fontsize=11)
 plt.legend()
@@ -102,59 +103,50 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-# Function that calculates the fraction of ORFs greater than L_star
-def fraction_orfs_greater_than_Lstar(lengths, L_star):
-    total_orfs = len(lengths)
-    if total_orfs == 0:
-        return 0  # Avoid division by zero if there are no ORFs
-    
-    # Count the number of ORFs with length > L_star
-    count_greater_than_Lstar = sum(1 for length in lengths if length > L_star)
-    
-    # Calculate the fraction
-    fraction = count_greater_than_Lstar / total_orfs
+
+
+# c) Estimate a cut-off value Lcut, above which the ORFs are statistically significant, i.e. the number of observed 
+# ORFs with L > Lcut is much greater than expected by chance.
+
+
+# function that calculates the fraction of ORFs greater than L_cut
+def fraction_greater_than_Lcut(lengths, L_cut):
+    N_ORFs = len(lengths)
+
+    if N_ORFs == 0:
+        return 0  # i want to avoid division by zero 
+   
+    count = 0
+    for length in lengths:
+        if length > L_cut:
+            count+=1
+
+    fraction = count / N_ORFs
     return fraction
 
-# Set the range of L_star values
-L_star_range = np.linspace(0, 200, 30) 
-# Initialize lists to store fractions
+L_cut_range = np.linspace(0, 200, 30) 
 random_fractions = []
-real_fractions_per_frame = {0: [], 1: [], 2: []}  # Using a dictionary to store each frame
+real_fractions_per_frame = {0: [], 1: [], 2: []}  
 
-# Loop over L_star values and calculate fractions
-for L_star in L_star_range:
-    # Calculate fractions for random distances
-    random_fractions.append(fraction_orfs_greater_than_Lstar(random_distances, L_star))
-    
-    # Calculate fractions for each real frame
+for L_cut in L_cut_range:
+    random_fractions.append(fraction_greater_than_Lcut(random_distances, L_cut))
     for i in range(3):
-        real_fractions_per_frame[i].append(fraction_orfs_greater_than_Lstar(real_distances_per_frame[i], L_star))
+        real_fractions_per_frame[i].append(fraction_greater_than_Lcut(real_distances_per_frame[i], L_cut))
 
-# Plotting the results as scatter plots
+# plotting 
 plt.figure(figsize=(10, 6))
-
-# Plot fractions for each frame as scatter plots
 for i in range(3):
-    plt.scatter(L_star_range, real_fractions_per_frame[i], label=f'Frame {i}', s=10)  # Adjust size (s) as needed
+    plt.scatter(L_cut_range, real_fractions_per_frame[i], label=f'Frame {i}', s=10)  
+plt.scatter(L_cut_range, random_fractions, label='Random', color='red', s=10)
 
-# Plot fractions for random data as a scatter plot
-plt.scatter(L_star_range, random_fractions, label='Random', color='red', s=10)
-
-# Set y-axis to log scale
+# log scale so it's easier to graphically see the deviation from random case
 plt.yscale('log')
-
-# Set x-axis limit
+# same range as plot before
 plt.xlim(-5, 180)
-
-# Add labels and title
-plt.xlabel('L* (Codon Length)', fontsize=11)
-plt.ylabel('Fraction of ORFs with L > L*', fontsize=11)
-plt.title('Fraction of ORFs with L > L* as a Function of L* (Scatter)', fontsize=14)
-
-# Add legend
+plt.xlabel('L_cut (codons)', fontsize=11)
+plt.ylabel('Relative fraction of ORFs with L > L_cut', fontsize=11)
+plt.title('ORFs Statistical Significance', fontsize=14)
 plt.legend()
-
-# Show plot
 plt.grid(True)
 plt.tight_layout()
 plt.show()
