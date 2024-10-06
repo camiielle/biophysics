@@ -37,7 +37,7 @@ def find_stops(sequence, frame):
       
     return stop_positions
 
-# calculates distances between consecutive stop codons in terms of codons
+# calculates distances between consecutive stop codons (in terms of codons, not bases)
 def find_distances(stop_positions):
     distances = []
     for i in range(1, len(stop_positions)):
@@ -45,18 +45,16 @@ def find_distances(stop_positions):
         distances.append(distance)
     return distances
 
-# generates a random sequence of nucleotides of length l
 def generate_random_sequence(l):
     nucleotides = ['A', 'T', 'C', 'G']
     return ''.join(random.choice(nucleotides) for _ in range(l))
 
-# plots ORF lengths distribution 
 def plot_ORF_length_distribution(lengths, label, color):
-    length_counts = Counter(lengths)  # Count the frequency of each length
+    length_counts = Counter(lengths)  # counts the frequency of each length
     N_ORFs = sum(length_counts.values())  
     length_frequencies = {length: count / N_ORFs for length, count in length_counts.items()}  
     lengths_sorted = sorted(length_frequencies.items())  
-    lengths_list, frequencies = zip(*lengths_sorted)  # Unzip into two lists
+    lengths_list, frequencies = zip(*lengths_sorted)  
     
     plt.scatter(lengths_list, frequencies, color=color, label=label, s=3)
 
@@ -108,19 +106,15 @@ plt.show()
 # c) Estimate a cut-off value Lcut, above which the ORFs are statistically significant, i.e. the number of observed 
 # ORFs with L > Lcut is much greater than expected by chance.
 
-
 # function that calculates the fraction of ORFs greater than L_cut
 def fraction_greater_than_Lcut(lengths, L_cut):
     N_ORFs = len(lengths)
-
     if N_ORFs == 0:
         return 0  # i want to avoid division by zero 
-   
     count = 0
     for length in lengths:
         if length > L_cut:
             count+=1
-
     fraction = count / N_ORFs
     return fraction
 
@@ -138,11 +132,8 @@ plt.figure(figsize=(10, 6))
 for i in range(3):
     plt.scatter(L_cut_range, real_fractions_per_frame[i], label=f'Frame {i}', s=10)  
 plt.scatter(L_cut_range, random_fractions, label='Random', color='red', s=10)
-
-# log scale so it's easier to graphically see the deviation from random case
-plt.yscale('log')
-# same range as plot before
-plt.xlim(-5, 180)
+plt.yscale('log') # log scale so it's easier to graphically see the deviation from random case
+plt.xlim(-5, 180) # same range as plot before
 plt.xlabel('L_cut (codons)', fontsize=11)
 plt.ylabel('Relative fraction of ORFs with L > L_cut', fontsize=11)
 plt.title('ORFs Statistical Significance', fontsize=14)
