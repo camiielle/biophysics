@@ -22,7 +22,7 @@ def read_file(file_path):
     return sequence
 
 # finds the stop codons when given a specified frame 
-# NM: qui sto assumendo che la sequenza sia multiplo di 3 però
+# I take into account the circularity 
 def find_stops(sequence, frame):
     stop_codons = ["TAA", "TGA", "TAG"]
     stop_positions = [] 
@@ -36,11 +36,11 @@ def find_stops(sequence, frame):
       
     return stop_positions
 
+# calculates distances between consecutive stop codons in terms of codons
 def find_distances(stop_positions):
-    """Calculates the distances between consecutive stop codons in terms of codons."""
     distances = []
     for i in range(1, len(stop_positions)):
-        distance = (stop_positions[i] - stop_positions[i - 1]-3) // 3  # Divide by 3 to get number of codons
+        distance = (stop_positions[i] - stop_positions[i - 1]- 3) // 3  # I divide by 3 to get distance in terms of codons
         distances.append(distance)
     return distances
 
@@ -49,14 +49,23 @@ def generate_random_sequence(l):
     nucleotides = ['A', 'T', 'C', 'G']
     return ''.join(random.choice(nucleotides) for _ in range(l))
 
-file_path = './77177281caa9fedfeb5d8fdbfb33167d_U00096.fna'
+# plots ORF lengths distribution 
+def plot_ORF_length_distribution(lengths, label, color):
+    length_counts = Counter(lengths)  # Count the frequency of each length
+    N_ORFs = sum(length_counts.values())  
+    length_frequencies = {length: count / N_ORFs for length, count in length_counts.items()}  
+    lengths_sorted = sorted(length_frequencies.items())  
+    lengths_list, frequencies = zip(*lengths_sorted)  # Unzip into two lists
+    
+    plt.scatter(lengths_list, frequencies, color=color, label=label, s=3)
 
+file_path = './77177281caa9fedfeb5d8fdbfb33167d_U00096.fna'
 real_sequence = read_file(file_path)
 length = len(real_sequence)
-real_distances_per_frame = []
 
 # processes each of the three reading frames
 # each frame produces a different set of codons
+real_distances_per_frame = []
 for frame in range(3):
     real_positions = find_stops(real_sequence, frame)   
     real_distances = find_distances(real_positions)
@@ -66,52 +75,30 @@ random_sequence = generate_random_sequence(length)
 random_positions = find_stops(random_sequence, 0)
 random_distances = find_distances(random_positions)
 
-def plot_scatter_from_probabilities(lengths, label, color):
-    """Generates a scatter plot for ORF lengths and their probabilities."""
-    length_counts = Counter(lengths)  # Count the frequency of each length
-    total_orfs = sum(length_counts.values())  # Total number of ORFs for normalization
-    length_probabilities = {length: count / total_orfs for length, count in length_counts.items()}  # Normalize to probabilities
-    
-    lengths_sorted = sorted(length_probabilities.items())  # Sort by ORF length
-    lengths_list, probabilities = zip(*lengths_sorted)  # Unzip into two lists
-    
-    plt.scatter(lengths_list, probabilities, color=color, label=label, alpha=0.7, s=3)
-
-# Calculate mean ORF lengths for each real genome frame
+# Calculate mean ORF length 
 mean_frame_0 = statistics.mean(real_distances_per_frame[0])
 mean_frame_1 = statistics.mean(real_distances_per_frame[1])
 mean_frame_2 = statistics.mean(real_distances_per_frame[2])
-
-# Calculate mean ORF length for random sequence (frame 0)
 mean_random = statistics.mean(random_distances)
 
-print(f"Mean ORF length for Frame 0: {mean_frame_0} codons")
-print(f"Mean ORF length for Frame 1: {mean_frame_1} codons")
-print(f"Mean ORF length for Frame 2: {mean_frame_2} codons")
-print(f"Mean ORF length for Random Frame 0: {mean_random} codons")
-
-colors = ['blue', 'green', 'orange']   
-# Plotting
+# Creating the plot
 plt.figure(figsize=(10, 6))
-    
-# Plot ORF length vs frequency for each real frame
+colors = ['blue', 'green', 'orange']  
 for frame in range(3):
-    plot_scatter_from_probabilities(real_distances_per_frame[frame], label=f'Frame {frame}', color=colors[frame])
-    
-# Plot ORF length vs frequency for random frame 0
-plot_scatter_from_probabilities(random_distances, label='Random', color='red')
+    plot_ORF_length_distribution(real_distances_per_frame[frame], label=f'Frame {frame}', color=colors[frame])
 
-# Add titles and labels
-plt.title('ORFs length distribution', fontsize=14)
-plt.xlabel('ORF length (codons)', fontsize=12)
-plt.ylabel('Relative frequency', fontsize=12)
+plot_ORF_length_distribution(random_distances, label='Random', color='red')
+
+mean_text = f"Mean ORF length (codons):\nFrame 0: {mean_frame_0:.2f}\nFrame 1: {mean_frame_1:.2f}\nFrame 2: {mean_frame_2:.2f}\nRandom: {mean_random:.2f}"
+plt.text(0.77, 0.15, mean_text, transform=plt.gca().transAxes, fontsize=10,
+         bbox=dict(facecolor='white', alpha=0.5))
+
+plt.title('ORF Length Distribution', fontsize=16)
+plt.xlabel('ORF length (codons)', fontsize=11)
+plt.ylabel('Relative frequency', fontsize=11)
 plt.legend()
-
-# Set x-axis limit
-# the mean is around 25 so i feel like this is a reasonable range
-plt.xlim(-5, 180)
-    
-# Show the plot
+plt.xlim(-5, 180) # the mean is around 25 so i feel like this is a reasonable range
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
@@ -160,8 +147,8 @@ plt.yscale('log')
 plt.xlim(-5, 180)
 
 # Add labels and title
-plt.xlabel('L* (Codon Length)', fontsize=12)
-plt.ylabel('Fraction of ORFs with L > L*', fontsize=12)
+plt.xlabel('L* (Codon Length)', fontsize=11)
+plt.ylabel('Fraction of ORFs with L > L*', fontsize=11)
 plt.title('Fraction of ORFs with L > L* as a Function of L* (Scatter)', fontsize=14)
 
 # Add legend
