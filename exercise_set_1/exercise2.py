@@ -50,7 +50,7 @@ def generate_random_sequence(l):
     return ''.join(random.choice(nucleotides) for _ in range(l))
 
 def plot_ORF_length_distribution(lengths, label, color):
-    length_counts = Counter(lengths)  # counts the frequency of each length
+    length_counts = Counter(lengths) 
     N_ORFs = sum(length_counts.values())  
     length_frequencies = {length: count / N_ORFs for length, count in length_counts.items()}  
     lengths_sorted = sorted(length_frequencies.items())  
@@ -74,13 +74,13 @@ random_sequence = generate_random_sequence(length)
 random_positions = find_stops(random_sequence, 0)
 random_distances = find_distances(random_positions)
 
-# Calculate mean ORF length 
+# calculates mean ORF length 
 mean_frame_0 = statistics.mean(real_distances_per_frame[0])
 mean_frame_1 = statistics.mean(real_distances_per_frame[1])
 mean_frame_2 = statistics.mean(real_distances_per_frame[2])
 mean_random = statistics.mean(random_distances)
 
-# Creating the plot
+# plotting
 plt.figure(figsize=(10, 6))
 colors = ['blue', 'green', 'orange']  
 for frame in range(3):
@@ -102,11 +102,10 @@ plt.tight_layout()
 plt.show()
 
 
-
 # c) Estimate a cut-off value Lcut, above which the ORFs are statistically significant, i.e. the number of observed 
 # ORFs with L > Lcut is much greater than expected by chance.
 
-# function that calculates the fraction of ORFs greater than L_cut
+# calculates the fraction of ORFs greater than L_cut
 def fraction_greater_than_Lcut(lengths, L_cut):
     N_ORFs = len(lengths)
     if N_ORFs == 0:
@@ -139,5 +138,4 @@ plt.ylabel('Relative fraction of ORFs with L > L_cut', fontsize=11)
 plt.title('ORFs Statistical Significance', fontsize=14)
 plt.legend()
 plt.grid(True)
-plt.tight_layout()
 plt.show()
