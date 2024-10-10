@@ -55,7 +55,6 @@ def plot_ORF_length_distribution(lengths, label, color):
     length_frequencies = {length: count / N_ORFs for length, count in length_counts.items()}  
     lengths_sorted = sorted(length_frequencies.items())  
     lengths_list, frequencies = zip(*lengths_sorted)  
-    
     plt.scatter(lengths_list, frequencies, color=color, label=label, s=3)
 
 file_path = './77177281caa9fedfeb5d8fdbfb33167d_U00096.fna'
@@ -101,7 +100,6 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-
 # c) Estimate a cut-off value Lcut, above which the ORFs are statistically significant, i.e. the number of observed 
 # ORFs with L > Lcut is much greater than expected by chance.
 
@@ -139,3 +137,28 @@ plt.title('ORFs Statistical Significance', fontsize=14)
 plt.legend()
 plt.grid(True)
 plt.show()
+
+# plot for calculating L_cut with alternative method using function found in exercise 1
+p_s= 3/64
+def random_function(L):
+    return (1-p_s)**L * p_s
+plt.figure(figsize=(10, 6))
+for frame in range(3):
+    plot_ORF_length_distribution(real_distances_per_frame[frame], label=f'Frame {frame}', color=colors[frame])
+L_range = np.arange(0, 180)  
+random_values = [random_function(L) for L in L_range]  
+plt.plot(L_range, random_values, color='red', label='Random Function')
+plt.title('ORFs Statistical Significance (alternative method)', fontsize=16)
+plt.xlabel('ORF length (codons)', fontsize=11)
+plt.ylabel('Relative frequency', fontsize=11)
+plt.yscale('log')
+plt.legend()
+plt.xlim(-5, 180) # same range as plot before
+plt.grid(True)
+plt.minorticks_on()
+plt.grid(True, which='minor', linestyle=':', linewidth=0.5)
+plt.tight_layout()
+plt.show()
+
+
+

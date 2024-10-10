@@ -20,7 +20,6 @@ def nucleotide_frequencies(sequence):
     N_nucleotides = sum(nucleotide_counter.values())
     return {nucleotide: count / N_nucleotides for nucleotide, count in nucleotide_counter.items()}
 
-
 file_path = './77177281caa9fedfeb5d8fdbfb33167d_U00096.fna'
 sequence = read_file(file_path)
 frequencies = nucleotide_frequencies(sequence)
@@ -62,16 +61,13 @@ def construct_symbolic_matrix():
             matrix[i, j] = n1+n2
     return matrix
 
-
-correlation_matrix = construct_correlation_matrix(
-    frequencies, pair_frequencies(sequence))
-
-# Display the correlation matrix
+# prints the matrix
 print("\n4x4 Correlation Matrix:\n")
 print(construct_symbolic_matrix())
 print()
 np.set_printoptions(precision=4)
-print(correlation_matrix)
+print(construct_correlation_matrix(
+    frequencies, pair_frequencies(sequence)))
 
 
 # (c) Repeat the above calculation for nucleotides that are further neighbors, and find the corresponding matrices
@@ -93,14 +89,12 @@ y_axis_AA = []
 y_axis_AG = []
 y_axis_AC = []
 y_axis_AT = []
-
 for n in range(1, 41):
     matrix = construct_correlation_matrix(frequencies, spaced_pair_frequencies(sequence, n))
     y_axis_AA.append(matrix[0, 0])  
     y_axis_AG.append(matrix[0, 1]) 
     y_axis_AC.append(matrix[0, 2]) 
     y_axis_AT.append(matrix[0, 3]) 
-
 
 x_axis = list(range(1, 41))
 fig, axs = plt.subplots(2, 2, figsize=(10, 8))
